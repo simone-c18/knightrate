@@ -1,60 +1,69 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 export default function Register()
 {
   const [form, setForm] = useState({
-    username: "",
-    email: "",
+    firstName: "",
+    lastName: "",
+    login: "",
     password: "",
     confirmPassword: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => 
-    {
-    setForm
-    (
-    {
+  const [message, setMessage] = useState("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+  {
+    setForm({
       ...form,
       [e.target.name]: e.target.value,
-    }
-    );
+    });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) =>
+  {
     e.preventDefault();
 
     if (form.password !== form.confirmPassword)
     {
-      alert("Passwords do not match");
+      setMessage("Passwords do not match");
       return;
     }
 
+    // TEMP TEST
     console.log("Register Data:", form);
-
+    setMessage("Registration successful (for now)");
   };
 
   return (
-    <div className="register-container">
-      <h2>Create Account</h2>
+    <div id="registerDiv">
+      <span id="inner-title">PLEASE REGISTER</span><br />
 
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={form.username}
-          onChange={handleChange}
-          required
-        />
 
         <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
+          type="text"
+          name="firstName"
+          placeholder="First Name"
+          value={form.firstName}
           onChange={handleChange}
-          required
-        />
+        /><br />
+
+        <input
+          type="text"
+          name="lastName"
+          placeholder="Last Name"
+          value={form.lastName}
+          onChange={handleChange}
+        /><br />
+
+        <input
+          type="text"
+          name="login"
+          placeholder="Username"
+          value={form.login}
+          onChange={handleChange}
+        /><br />
 
         <input
           type="password"
@@ -62,8 +71,7 @@ export default function Register()
           placeholder="Password"
           value={form.password}
           onChange={handleChange}
-          required
-        />
+        /><br />
 
         <input
           type="password"
@@ -71,11 +79,17 @@ export default function Register()
           placeholder="Confirm Password"
           value={form.confirmPassword}
           onChange={handleChange}
-          required
-        />
+        /><br />
 
         <button type="submit">Register</button>
       </form>
+
+      <span>{message}</span><br />
+
+      {/* Back to Login */}
+      <button onClick={() => window.location.href = "/"}>
+        Back to Login
+      </button>
     </div>
   );
 }
