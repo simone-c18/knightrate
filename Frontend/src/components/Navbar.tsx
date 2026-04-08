@@ -6,7 +6,7 @@ export default function Navbar() {
   const location = useLocation();
 
   const links = [
-    { label: "Leaderboard", path: "/leaderboard" },
+    { label: "About", path: "/about" },
     { label: "Search", path: "/search" },
     { label: "Starred", path: "/starred" },
     { label: "Settings", path: "/settings" },

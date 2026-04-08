@@ -22,7 +22,7 @@ function App() {
         <Route path="/search-results" element={<SearchResults />} />
         <Route path="/starred" element={<Starred />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/leaderboard" element={<HowItWorks />} />
+        <Route path="/about" element={<HowItWorks />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
       </Routes>
     </BrowserRouter>
