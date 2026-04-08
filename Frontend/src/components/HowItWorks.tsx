@@ -1,34 +1,32 @@
 import Navbar from "./Navbar";
 import "./HowItWorks.css";
+import unicornImg from "../assets/unicorn.png";
+import mastermindImg from "../assets/brain.png";
+import saboteurImg from "../assets/bomb.png"; 
+import npcImg from "../assets/bot.png";
 
 const archetypes = [
   {
     name: "The Unicorn",
+    img: unicornImg,
     desc: "The rarest professor — high scores across the board, easy grader, and beloved by students. GPA savior, top tier teaching, zero stress.",
   },
   {
     name: "The Mastermind",
+    img: mastermindImg,
     desc: "Highly knowledgeable and engaging, but expects a lot from students. Challenging but ultimately rewarding.",
   },
   {
     name: "The Sabetuer",
+    img: saboteurImg,
     desc: "Poor teaching quality paired with harsh grading. Students often feel set up to fail. Proceed with caution.",
   },
   {
     name: "The NPC",
+    img: npcImg,
     desc: "Average in every metric — not particularly good or bad. You get what you put in.",
   },
 ];
-
-const UnicornIcon = () => (
-  <div className="hiw-icon">
-    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
-      <path d="M32 10 C22 10 14 18 14 30 C14 42 22 50 32 50 C42 50 50 42 50 30 C50 18 42 10 32 10Z" stroke="black" strokeWidth="2" fill="none"/>
-      <path d="M32 10 L36 4" stroke="black" strokeWidth="2"/>
-      <path d="M28 16 C26 12 30 8 34 10" stroke="black" strokeWidth="1.5" fill="none"/>
-    </svg>
-  </div>
-);
 
 export default function HowItWorks() {
   return (
@@ -59,7 +57,13 @@ export default function HowItWorks() {
           <div key={a.name} className="hiw-archetype">
             <h2 className="archetype-name">{a.name}</h2>
             <div className="archetype-row">
-              <UnicornIcon />
+              <div className="hiw-icon">
+                <img 
+                  src={a.img} 
+                  alt={a.name} 
+                  style={{ width: "70px", height: "70px", objectFit: "contain" }} 
+                />
+              </div>
               <p className="archetype-desc">{a.desc}</p>
             </div>
           </div>
