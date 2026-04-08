@@ -24,31 +24,38 @@ export default function Verify() {
     api.get(`/auth/verify?token=${token}`)
       .then((res) => {
         setStatus("success");
-        setMessage(res.data.msg);
+        setMessage(res.data.msg || "Your email has been successfully verified.");
       })
       .catch((err) => {
         setStatus("error");
-        setMessage(err.response?.data?.msg || "Verification failed.");
+        setMessage(err.response?.data?.msg || "Verification link is invalid or has expired.");
       });
-  }, []);
+  }, [searchParams]);
 
   return (
-    <div className="login-page">
-      <div className="orb orb-1" />
-      <div className="orb orb-2" />
-      <div className="login-card mode-login" style={{ textAlign: "center" }}>
-        <div className="card-header">
-          <h1 className="card-title">
-            {status === "loading" && "Verifying..."}
-            {status === "success" && "Email Verified!"}
-            {status === "error" && "Verification Failed"}
-          </h1>
-          <p className="card-sub">{message}</p>
-        </div>
+    <div className="auth-page">
+      <div className="auth-card" style={{ textAlign: "center" }}>
+        <h1 className="auth-title">
+          {status === "loading" && "Verifying..."}
+          {status === "success" && "Success!"}
+          {status === "error" && "Verification Failed"}
+        </h1>
+        
+        <p className="auth-sub" style={{ marginBottom: "2rem" }}>
+          {status === "loading" ? "Please wait while we confirm your account." : message}
+        </p>
+
         {status !== "loading" && (
-          <button className="btn-submit" onClick={() => navigate("/login")}>
+          <button className="auth-btn" onClick={() => navigate("/login")}>
             Go to Login
           </button>
+        )}
+
+        {status === "loading" && (
+          /* Simple CSS spinner  */
+          <div className="loading-placeholder" style={{ color: "rgba(255,255,255,0.5)" }}>
+            Checking token...
+          </div>
         )}
       </div>
     </div>
