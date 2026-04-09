@@ -1,114 +1,84 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import "./SearchResults.css";
-
-// Unicorn icon SVG inline
-const UnicornIcon = () => (
-  <div className="archetype-icon">
-    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
-      <path d="M32 8 C20 8 12 18 12 30 C12 42 20 50 32 50 C44 50 52 42 52 30 C52 18 44 8 32 8Z" stroke="white" strokeWidth="2" fill="none"/>
-      <path d="M32 8 L36 2" stroke="white" strokeWidth="2"/>
-      <path d="M28 14 C26 10 30 6 34 8" stroke="white" strokeWidth="1.5" fill="none"/>
-    </svg>
-  </div>
-);
+import { searchProfessors } from "../services/api";
+import unicornImg from "../assets/unicorn.png";
+import mastermindImg from "../assets/brain.png";
+import saboteurImg from "../assets/bomb.png";
+import npcImg from "../assets/bot.png";
 
 interface Professor {
-  id: string;
-  name: string;
-  score: number;
+  _id: string;
+  firstName: string;
+  lastName: string;
+  overallScore: number;
   archetype: string;
-  archetypeDesc: string;
-  retake: number;
-  quality: number;
-  difficulty: number;
-  overall: number;
-  lastTaught: string;
-  polarizing: boolean;
-  tags: string[];
-  overview: string[];
-  photo?: string;
+  retakeScore: number;
+  qualityScore: number;
+  difficultyScore: number;
+  lastTimeTaught: string;
+  isPolarizing: boolean;
+  rmpTags: string[];
 }
-
-// Mock data — replace with real API calls
-const MOCK_PROFESSORS: Professor[] = [
-  {
-    id: "1",
-    name: "Andrew Steinberg",
-    score: 92.7,
-    archetype: "The Unicorn",
-    archetypeDesc: "GPA savior, top tier teaching, zero stress.",
-    retake: 67.3,
-    quality: 70.2,
-    difficulty: 92.7,
-    overall: 92.7,
-    lastTaught: "Fall 25'",
-    polarizing: true,
-    tags: ["Fair Grader", "Extra Credit", "Fair Grader"],
-    overview: ["Fair grader", "Accessible outside of class", "Extra credit", "Polarizing → Yes"],
-  },
-  {
-    id: "2",
-    name: "Aashish Yadavally",
-    score: 88.2,
-    archetype: "The Mastermind",
-    archetypeDesc: "Challenging but rewarding. High quality instruction.",
-    retake: 55.0,
-    quality: 68.0,
-    difficulty: 80.0,
-    overall: 88.2,
-    lastTaught: "Spring 25'",
-    polarizing: false,
-    tags: ["Tough Grader", "Helpful"],
-    overview: ["Detailed feedback", "Office hours available"],
-  },
-  {
-    id: "3",
-    name: "Paul Gazillo",
-    score: 80.7,
-    archetype: "The Mastermind",
-    archetypeDesc: "Deep knowledge, expects hard work.",
-    retake: 50.0,
-    quality: 60.0,
-    difficulty: 75.0,
-    overall: 80.7,
-    lastTaught: "Fall 24'",
-    polarizing: false,
-    tags: ["Tough Grader"],
-    overview: ["Research focused", "Clear expectations"],
-  },
-];
-
-const MOCK_COURSES = [
-  { id: "cop4331", name: "COP 4331: Processes of Object Oriented Software Development" },
-  { id: "cop3502", name: "COP 3502: Computer Science I" },
-  { id: "cop3503", name: "COP 3503: Computer Science II" },
-];
 
 const UCF_AVG = 34.2;
 
 const TAG_COLORS: Record<string, string> = {
-  "Fair Grader": "#7c3aed",
+  "Fair Grader":  "#7c3aed",
   "Extra Credit": "#0ea5e9",
   "Tough Grader": "#dc2626",
-  "Helpful": "#16a34a",
+  "Helpful":      "#16a34a",
+};
+
+const ARCHETYPE_DESC: Record<string, string> = {
+  "The Unicorn":    "GPA savior, top tier teaching, zero stress.",
+  "The Mastermind": "Challenging but rewarding. High quality instruction.",
+  "The NPC":        "Gets the job done. Nothing more, nothing less.",
+  "The Saboteur":   "Proceed with caution. High risk, high stress.",
+};
+
+const ARCHETYPE_IMG: Record<string, string> = {
+  "The Unicorn":    unicornImg,
+  "The Mastermind": mastermindImg,
+  "The NPC":        npcImg,
+  "The Saboteur":   saboteurImg,
 };
 
 export default function SearchResults() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const type = searchParams.get("type") || "professor";
-  const filter = searchParams.get("filter") || "name";
-  const initialQuery = searchParams.get("q") || "";
+  const filter       = searchParams.get("filter") || "name";
+  const initialQuery = searchParams.get("q")      || "";
 
-  const [query, setQuery] = useState(initialQuery);
+  const [query, setQuery]               = useState(initialQuery);
   const [activeFilter, setActiveFilter] = useState(filter);
-  const [expandedId, setExpandedId] = useState<string | null>(MOCK_PROFESSORS[0]?.id ?? null);
-  const [starred, setStarred] = useState<Set<string>>(new Set());
+  const [professors, setProfessors]     = useState<Professor[]>([]);
+  const [loading, setLoading]           = useState(false);
+  const [error, setError]               = useState("");
+  const [expandedId, setExpandedId]     = useState<string | null>(null);
+  const [starred, setStarred]           = useState<Set<string>>(new Set());
 
-  const isProfessor = type === "professor";
+  useEffect(() => {
+    if (!initialQuery.trim()) return;
+
+    const fetchResults = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await searchProfessors(filter, initialQuery);
+        setProfessors(data);
+        if (data.length > 0) setExpandedId(data[0]._id);
+      } catch (err: any) {
+        setError(err.response?.data?.msg || "Failed to fetch results.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResults();
+  }, [filter, initialQuery]);
 
   const toggleStar = (id: string) => {
     setStarred(prev => {
@@ -120,7 +90,8 @@ export default function SearchResults() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate(`/search-results?type=${type}&filter=${activeFilter}&q=${encodeURIComponent(query)}`);
+    if (!query.trim()) return;
+    navigate(`/search-results?filter=${activeFilter}&q=${encodeURIComponent(query)}`);
   };
 
   return (
@@ -128,21 +99,21 @@ export default function SearchResults() {
       <Navbar />
 
       <div className="results-body">
-        <h1 className="results-heading">
-          {isProfessor ? `Results for: ${initialQuery}` : "Search for UCF courses"}
-        </h1>
+        <h1 className="results-heading">Results for: {initialQuery}</h1>
 
-        {/* Radio + search bar */}
         <div className="results-filters">
           <label className="radio-label">
-            <input type="radio" value="name" checked={activeFilter === "name"} onChange={() => setActiveFilter("name")} />
+            <input type="radio" value="name" checked={activeFilter === "name"}
+              onChange={() => setActiveFilter("name")} />
             Name
           </label>
           <label className="radio-label">
-            <input type="radio" value="course" checked={activeFilter === "course"} onChange={() => setActiveFilter("course")} />
+            <input type="radio" value="course" checked={activeFilter === "course"}
+              onChange={() => setActiveFilter("course")} />
             Course
           </label>
         </div>
+
         <form onSubmit={handleSearch}>
           <input
             className="results-search-input"
@@ -152,82 +123,103 @@ export default function SearchResults() {
           />
         </form>
 
-        {/* Results */}
+        {loading && <p className="results-status">Searching...</p>}
+        {error   && <p className="results-status error">{error}</p>}
+        {!loading && !error && professors.length === 0 && initialQuery && (
+          <p className="results-status">No professors found for "{initialQuery}".</p>
+        )}
+
         <div className="results-list">
-          {isProfessor ? (
-            MOCK_PROFESSORS.map(prof => (
-              <div key={prof.id}>
-                {expandedId === prof.id ? (
-                  /* Expanded card */
+          {professors.map(prof => {
+            const fullName = `${prof.firstName} ${prof.lastName}`;
+            const isExpanded = expandedId === prof._id;
+            const archetypeImg = ARCHETYPE_IMG[prof.archetype];
+
+            return (
+              <div key={prof._id}>
+                {isExpanded ? (
                   <div className="prof-card expanded">
                     <div className="prof-card-top">
+
+                      {/* Left col — archetype */}
                       <div className="prof-archetype-col">
                         <span className="archetype-label">{prof.archetype}</span>
-                        <UnicornIcon />
-                        <p className="archetype-desc">{prof.archetypeDesc}</p>
-                        <p className="prof-meta"><strong>Last Time Taught:</strong> {prof.lastTaught}</p>
-                        <p className="prof-meta"><strong>Polarizing →</strong> {prof.polarizing ? "Yes" : "No"}</p>
+                        <div className="archetype-icon">
+                          <img
+                            src={archetypeImg}
+                            alt={prof.archetype}
+                            style={{ width: "60px", height: "60px", objectFit: "contain" }}
+                          />
+                        </div>
+                        <p className="archetype-desc">{ARCHETYPE_DESC[prof.archetype]}</p>
+                        <p className="prof-meta"><strong>Last Time Taught:</strong> {prof.lastTimeTaught}</p>
+                        <p className="prof-meta"><strong>Polarizing →</strong> {prof.isPolarizing ? "Yes" : "No"}</p>
                       </div>
+
+                      {/* Right col — scores */}
                       <div className="prof-scores-col">
                         <div className="prof-name-row">
-                          <span className="prof-name">{prof.name}</span>
+                          <span className="prof-name">{fullName}</span>
                           <button
-                            className={`star-btn ${starred.has(prof.id) ? "starred" : ""}`}
-                            onClick={() => toggleStar(prof.id)}
+                            className={`star-btn ${starred.has(prof._id) ? "starred" : ""}`}
+                            onClick={() => toggleStar(prof._id)}
                           >★</button>
                         </div>
+
                         <div className="legend-row">
                           <span className="legend-dot ucf" />
                           <span className="legend-text">UCF Average</span>
                           <span className="legend-dot prof" />
-                          <span className="legend-text">{prof.name}</span>
+                          <span className="legend-text">{fullName}</span>
                         </div>
+
                         {[
-                          { label: "Retake Score:", val: prof.retake },
-                          { label: "Quality Score:", val: prof.quality },
-                          { label: "Difficulty Score:", val: prof.difficulty },
-                          { label: "Overall Score:", val: prof.overall },
+                          { label: "Retake Score:",     val: prof.retakeScore },
+                          { label: "Quality Score:",    val: prof.qualityScore },
+                          { label: "Difficulty Score:", val: prof.difficultyScore },
+                          { label: "Overall Score:",    val: prof.overallScore },
                         ].map(({ label, val }) => (
                           <div key={label} className="score-row">
                             <span className="score-row-label">{label}</span>
                             <div className="score-track">
-                              <div className="score-bar ucf-bar" style={{ width: `${(UCF_AVG / 100) * 100}%` }} />
-                              <div className="score-bar prof-bar" style={{ width: `${(val / 100) * 100}%` }} />
+                              <div className="score-line" />
+                              <div className="ucf-bar" style={{ left: `${UCF_AVG}%` }} />
+                              <div className="prof-bar" style={{ left: `${val}%` }} />
                             </div>
-                            <span className="score-vals">{UCF_AVG} — {val}</span>
+                            <div className="score-vals">
+                              <span className="score-val-ucf">{UCF_AVG}</span>
+                              <span className="score-val-prof">{val}</span>
+                            </div>
                           </div>
                         ))}
                       </div>
                     </div>
+
+                    {/* Tags */}
                     <div className="prof-tags">
-                      {prof.tags.map((tag, i) => (
-                        <span key={i} className="tag" style={{ background: TAG_COLORS[tag] || "#555" }}>{tag}</span>
+                      {prof.rmpTags.map((tag, i) => (
+                        <span key={i} className="tag" style={{ background: TAG_COLORS[tag] || "#555" }}>
+                          {tag}
+                        </span>
                       ))}
                     </div>
+
+                    <button className="collapse-btn" onClick={() => setExpandedId(null)}>
+                      ▲ Collapse
+                    </button>
                   </div>
                 ) : (
-                  /* Collapsed card */
-                  <div className="prof-card collapsed" onClick={() => setExpandedId(prof.id)}>
+                  <div className="prof-card collapsed" onClick={() => setExpandedId(prof._id)}>
                     <div className="collapsed-left">
                       <div className="collapsed-avatar" />
-                      <span className="collapsed-name">{prof.name}</span>
+                      <span className="collapsed-name">{fullName}</span>
                     </div>
-                    <span className="collapsed-score">{prof.score}</span>
+                    <span className="collapsed-score">{prof.overallScore}</span>
                   </div>
                 )}
               </div>
-            ))
-          ) : (
-            MOCK_COURSES.filter(c =>
-              c.name.toLowerCase().includes(initialQuery.toLowerCase()) ||
-              c.id.toLowerCase().includes(initialQuery.toLowerCase())
-            ).map(course => (
-              <div key={course.id} className="course-result">
-                <span className="course-name">{course.name}</span>
-                <UnicornIcon />
-              </div>
-            ))
-          )}
+            );
+          })}
         </div>
       </div>
     </div>

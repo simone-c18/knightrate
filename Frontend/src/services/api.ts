@@ -28,4 +28,11 @@ export const resetPassword = async (token: string, password: string) => {
   return response.data;
 };
 
+export const searchProfessors = async (filter: string, q: string) => {
+  const response = await api.get(`/professors/search`, {
+    params: { filter, q }
+  });
+  return response.data;
+};
+
 export default api;

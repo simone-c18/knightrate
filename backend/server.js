@@ -10,6 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/professors", require("./routes/professors"));
 
 // test route
 app.get("/", (req, res) => {
