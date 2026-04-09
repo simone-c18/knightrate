@@ -11,6 +11,8 @@ app.use(express.json());
 
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/professors", require("./routes/professors"));
+app.use("/api/users", require("./routes/users"));
+
 
 // test route
 app.get("/", (req, res) => {

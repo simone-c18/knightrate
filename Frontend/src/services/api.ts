@@ -7,6 +7,13 @@ const api = axios.create({
   },
 });
 
+// Attach token to every request automatically
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
 // Auth requests
 export const register = async (name: string, email: string, password: string) => {
   const response = await api.post('/auth/register', { name, email, password });
@@ -32,6 +39,22 @@ export const searchProfessors = async (filter: string, q: string) => {
   const response = await api.get(`/professors/search`, {
     params: { filter, q }
   });
+  return response.data;
+};
+
+// Starred
+export const getStarredProfessors = async () => {
+  const response = await api.get('/users/starred');
+  return response.data;
+};
+
+export const starProfessor = async (professorId: string) => {
+  const response = await api.post(`/users/starred/${professorId}`);
+  return response.data;
+};
+
+export const unstarProfessor = async (professorId: string) => {
+  const response = await api.delete(`/users/starred/${professorId}`);
   return response.data;
 };
 

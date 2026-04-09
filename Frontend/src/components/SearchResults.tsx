@@ -7,6 +7,7 @@ import unicornImg from "../assets/unicorn.png";
 import mastermindImg from "../assets/brain.png";
 import saboteurImg from "../assets/bomb.png";
 import npcImg from "../assets/bot.png";
+import { starProfessor, unstarProfessor } from "../services/api";
 
 interface Professor {
   _id: string;
@@ -80,13 +81,19 @@ export default function SearchResults() {
     fetchResults();
   }, [filter, initialQuery]);
 
-  const toggleStar = (id: string) => {
-    setStarred(prev => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  };
+  const toggleStar = async (id: string) => {
+  try {
+    if (starred.has(id)) {
+      await unstarProfessor(id);
+      setStarred(prev => { const next = new Set(prev); next.delete(id); return next; });
+    } else {
+      await starProfessor(id);
+      setStarred(prev => new Set(prev).add(id));
+    }
+  } catch (err) {
+    console.error("Star toggle failed:", err);
+  }
+};
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

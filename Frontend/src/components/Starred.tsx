@@ -1,125 +1,180 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import "./Starred.css";
+import { getStarredProfessors, unstarProfessor } from "../services/api";
+import unicornImg from "../assets/unicorn.png";
+import mastermindImg from "../assets/brain.png";
+import saboteurImg from "../assets/bomb.png";
+import npcImg from "../assets/bot.png";
 
-type Tab = "professors" | "courses";
+interface Professor {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  overallScore: number;
+  archetype: string;
+  retakeScore: number;
+  qualityScore: number;
+  difficultyScore: number;
+  lastTimeTaught: string;
+  isPolarizing: boolean;
+  rmpTags: string[];
+}
 
-const MOCK_STARRED_PROFS = [
-  {
-    id: "1",
-    name: "Andrew Steinberg",
-    sentimentRating: 24.5,
-    rmpTags: 42.5,
-    rmpDifficulty: 12.8,
-    rmpQuality: 15.4,
-    clarityScore: 17.9,
-    total: 92.7,
-    overview: ["Fair grader", "Accessible outside of class", "Extra credit", "Polarizing → Yes"],
-  },
-  {
-    id: "2",
-    name: "Aashish Yadavally",
-    sentimentRating: 20.1,
-    rmpTags: 38.0,
-    rmpDifficulty: 10.5,
-    rmpQuality: 13.2,
-    clarityScore: 15.0,
-    total: 88.2,
-    overview: ["Detailed feedback", "Office hours available"],
-  },
-];
+const ARCHETYPE_IMG: Record<string, string> = {
+  "The Unicorn":    unicornImg,
+  "The Mastermind": mastermindImg,
+  "The NPC":        npcImg,
+  "The Saboteur":   saboteurImg,
+};
 
-const MOCK_STARRED_COURSES = [
-  { id: "cop4331", name: "COP 4331: Processes of Object Oriented Software Development" },
-];
+const ARCHETYPE_DESC: Record<string, string> = {
+  "The Unicorn":    "GPA savior, top tier teaching, zero stress.",
+  "The Mastermind": "Challenging but rewarding. High quality instruction.",
+  "The NPC":        "Gets the job done. Nothing more, nothing less.",
+  "The Saboteur":   "Proceed with caution. High risk, high stress.",
+};
+
+const TAG_COLORS: Record<string, string> = {
+  "Fair Grader":  "#7c3aed",
+  "Extra Credit": "#0ea5e9",
+  "Tough Grader": "#dc2626",
+  "Helpful":      "#16a34a",
+};
+
+const UCF_AVG = 34.2;
 
 export default function Starred() {
-  const [tab, setTab] = useState<Tab>("professors");
-  const [expandedId, setExpandedId] = useState<string | null>(MOCK_STARRED_PROFS[0]?.id ?? null);
+  const [professors, setProfessors] = useState<Professor[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchStarred = async () => {
+      try {
+        const data = await getStarredProfessors();
+        setProfessors(data);
+        if (data.length > 0) setExpandedId(data[0]._id);
+      } catch (err: any) {
+        setError("Failed to load starred professors. Are you logged in?");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStarred();
+  }, []);
+
+  const handleUnstar = async (id: string) => {
+    try {
+      await unstarProfessor(id);
+      setProfessors(prev => prev.filter(p => p._id !== id));
+      if (expandedId === id) setExpandedId(null);
+    } catch (err) {
+      console.error("Unstar failed:", err);
+    }
+  };
 
   return (
     <div className="starred-page">
       <Navbar />
       <div className="starred-body">
-        <h1 className="starred-heading">View Starred Items</h1>
+        <h1 className="starred-heading">Starred Professors</h1>
 
-        {/* Tabs */}
-        <div className="starred-tabs">
-          <button
-            className={`starred-tab ${tab === "professors" ? "active" : ""}`}
-            onClick={() => setTab("professors")}
-          >Professors</button>
-          <button
-            className={`starred-tab ${tab === "courses" ? "active" : ""}`}
-            onClick={() => setTab("courses")}
-          >Courses</button>
-        </div>
+        {loading && <p className="starred-status">Loading...</p>}
+        {error   && <p className="starred-status error">{error}</p>}
+        {!loading && !error && professors.length === 0 && (
+          <p className="starred-status">No starred professors yet. Star a professor from the search page!</p>
+        )}
 
-        {/* Content */}
         <div className="starred-list">
-          {tab === "professors" ? (
-            MOCK_STARRED_PROFS.map(prof => (
-              <div key={prof.id}>
-                {expandedId === prof.id ? (
-                  <div className="starred-card expanded">
-                    <div className="starred-card-inner">
-                      <div className="starred-card-header">
-                        <span className="starred-card-title">Score Breakdown</span>
-                        <span className="starred-star active">★</span>
-                      </div>
-                      <div className="starred-card-content">
-                        <div className="starred-prof-info">
-                          <div className="starred-avatar" />
-                          <span className="starred-prof-name">{prof.name}</span>
+          {professors.map(prof => {
+            const fullName = `${prof.firstName} ${prof.lastName}`;
+            const isExpanded = expandedId === prof._id;
+
+            return (
+              <div key={prof._id}>
+                {isExpanded ? (
+                  <div className="prof-card expanded">
+                    <div className="prof-card-top">
+
+                      <div className="prof-archetype-col">
+                        <span className="archetype-label">{prof.archetype}</span>
+                        <div className="archetype-icon">
+                          <img
+                            src={ARCHETYPE_IMG[prof.archetype]}
+                            alt={prof.archetype}
+                            style={{ width: "60px", height: "60px", objectFit: "contain" }}
+                          />
                         </div>
-                        <div className="starred-scores">
-                          {[
-                            { label: "Sentiment Rating:", val: prof.sentimentRating },
-                            { label: "RMP Tags:", val: prof.rmpTags },
-                            { label: "RMP Difficulty Score:", val: prof.rmpDifficulty },
-                            { label: "RMP Quality Score:", val: prof.rmpQuality },
-                            { label: "Clarity Score:", val: prof.clarityScore },
-                          ].map(({ label, val }) => (
-                            <div key={label} className="score-breakdown-row">
-                              <span className="breakdown-label">{label}</span>
-                              <span className="breakdown-val">{val}</span>
+                        <p className="archetype-desc">{ARCHETYPE_DESC[prof.archetype]}</p>
+                        <p className="prof-meta"><strong>Last Time Taught:</strong> {prof.lastTimeTaught}</p>
+                        <p className="prof-meta"><strong>Polarizing →</strong> {prof.isPolarizing ? "Yes" : "No"}</p>
+                      </div>
+
+                      <div className="prof-scores-col">
+                        <div className="prof-name-row">
+                          <span className="prof-name">{fullName}</span>
+                          <button
+                            className="star-btn starred"
+                            onClick={() => handleUnstar(prof._id)}
+                            title="Unstar professor"
+                          >★</button>
+                        </div>
+
+                        <div className="legend-row">
+                          <span className="legend-dot ucf" />
+                          <span className="legend-text">UCF Average</span>
+                          <span className="legend-dot prof" />
+                          <span className="legend-text">{fullName}</span>
+                        </div>
+
+                        {[
+                          { label: "Retake Score:",     val: prof.retakeScore },
+                          { label: "Quality Score:",    val: prof.qualityScore },
+                          { label: "Difficulty Score:", val: prof.difficultyScore },
+                          { label: "Overall Score:",    val: prof.overallScore },
+                        ].map(({ label, val }) => (
+                          <div key={label} className="score-row">
+                            <span className="score-row-label">{label}</span>
+                            <div className="score-track">
+                              <div className="score-line" />
+                              <div className="ucf-bar" style={{ left: `${UCF_AVG}%` }} />
+                              <div className="prof-bar" style={{ left: `${val}%` }} />
                             </div>
-                          ))}
-                          <div className="score-breakdown-divider" />
-                          <div className="score-breakdown-total">
-                            <span>Total:</span>
-                            <span className="total-circle">{prof.total}</span>
+                            <div className="score-vals">
+                              <span className="score-val-ucf">{UCF_AVG}</span>
+                              <span className="score-val-prof">{val}</span>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      <div className="starred-overview">
-                        <p className="overview-title">Overview</p>
-                        <ul className="overview-list">
-                          {prof.overview.map((item, i) => (
-                            <li key={i}>• {item}</li>
-                          ))}
-                        </ul>
+                        ))}
                       </div>
                     </div>
+
+                    <div className="prof-tags">
+                      {prof.rmpTags.map((tag, i) => (
+                        <span key={i} className="tag" style={{ background: TAG_COLORS[tag] || "#555" }}>
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    <button className="collapse-btn" onClick={() => setExpandedId(null)}>
+                      ▲ Collapse
+                    </button>
                   </div>
                 ) : (
-                  <div className="starred-card collapsed" onClick={() => setExpandedId(prof.id)}>
+                  <div className="prof-card collapsed" onClick={() => setExpandedId(prof._id)}>
                     <div className="collapsed-left">
                       <div className="collapsed-avatar" />
-                      <span className="collapsed-name">{prof.name}</span>
+                      <span className="collapsed-name">{fullName}</span>
                     </div>
-                    <span className="collapsed-score">{prof.total}</span>
+                    <span className="collapsed-score">{prof.overallScore}</span>
                   </div>
                 )}
               </div>
-            ))
-          ) : (
-            MOCK_STARRED_COURSES.map(course => (
-              <div key={course.id} className="starred-course-card">
-                <span>{course.name}</span>
-              </div>
-            ))
-          )}
+            );
+          })}
         </div>
       </div>
     </div>
