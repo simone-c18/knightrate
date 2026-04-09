@@ -116,4 +116,72 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// FORGOT PASSWORD
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    // Always respond with success even if email not found (prevents email enumeration)
+    if (!user) {
+      return res.json({ msg: "If that email exists, a reset link has been sent." });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpiry = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
+
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = resetTokenExpiry;
+    await user.save();
+
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    await sendEmail({
+      to: email,
+      subject: "Reset your password – Professor Selection Tool",
+      html: `<p>Hi ${user.name},</p>
+             <p>Click the link below to reset your password. It expires in 1 hour.</p>
+             <a href="${resetUrl}">${resetUrl}</a>
+             <p>If you didn't request this, you can safely ignore this email.</p>`,
+    });
+
+    res.json({ msg: "If that email exists, a reset link has been sent." });
+
+  } catch (err) {
+    console.error("FORGOT PASSWORD ERROR:", err.message);
+    console.error("FULL ERROR:", JSON.stringify(err));
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// RESET PASSWORD
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpiry: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ msg: "Invalid or expired reset link" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
+
+    res.json({ msg: "Password reset successful! You can now log in." });
+
+  } catch (err) {
+    console.error("RESET PASSWORD ERROR:", err.message);
+    console.error("FULL ERROR:", JSON.stringify(err));
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
 module.exports = router;

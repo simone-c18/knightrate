@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css"; // Reuse your existing login styles for consistency
-// import { requestPasswordReset } from "../services/api"; // You'll likely need this helper
+import { requestPasswordReset } from "../services/api"; // You'll likely need this helper
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -16,11 +16,8 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      // Replace this with your actual API call
-      // await requestPasswordReset(email);
-      
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      await requestPasswordReset(email);
       
       setSubmitted(true);
     } catch (err: any) {

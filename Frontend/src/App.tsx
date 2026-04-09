@@ -9,6 +9,8 @@ import Starred from "./components/Starred";
 import Settings from "./components/Settings";
 import HowItWorks from "./components/HowItWorks";
 import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
+
 
 function App() {
   return (
@@ -26,6 +28,7 @@ function App() {
         <Route path="/about" element={<HowItWorks />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </BrowserRouter>
   );
