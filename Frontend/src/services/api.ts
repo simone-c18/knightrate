@@ -58,4 +58,10 @@ export const unstarProfessor = async (professorId: string) => {
   return response.data;
 };
 
+// Global stats (UCF averages)
+export const getGlobalStats = async () => {
+  const response = await api.get('/stats/global');
+  return response.data;
+};
+
 export default api;

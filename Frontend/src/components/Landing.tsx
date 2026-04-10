@@ -41,16 +41,27 @@ export default function Landing() {
 
       {/* How It Works */}
       <section className="how-section">
-        <h2 className="how-title">Data sources</h2>
+        <h2 className="how-title">Built on real data</h2>
         <p className="how-sub">
           We aggregate data from multiple sources to calculate a unique, trustworthy professor rating.
         </p>
         <div className="how-sources">
-          <span className="how-source-chip">RateMyProfessor</span>
-          <span className="how-source-chip">SPI Surveys</span>
-          <span className="how-source-chip">LinkedIn</span>
-          <span className="how-source-chip">UCF Averages</span>
-          <span className="how-source-chip">+ more</span>
+          <div className="how-source-chip">
+            <span className="how-source-icon">⭐</span>
+            <span>RateMyProfessor</span>
+          </div>
+          <div className="how-source-chip">
+            <span className="how-source-icon">📋</span>
+            <span>SPI Surveys</span>
+          </div>
+          <div className="how-source-chip">
+            <span className="how-source-icon">🎓</span>
+            <span>UCF Grade Data</span>
+          </div>
+          <div className="how-source-chip">
+            <span className="how-source-icon">💼</span>
+            <span>LinkedIn</span>
+          </div>
         </div>
       </section>
     </div>

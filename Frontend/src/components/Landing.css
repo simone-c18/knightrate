@@ -195,11 +195,14 @@
 }
 
 .how-source-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text-2);
-  padding: 0.6rem 1.2rem;
-  border-radius: 99px;
+  padding: 0.65rem 1.3rem;
+  border-radius: 12px;
   font-size: 0.9rem;
   font-weight: 500;
   transition: all var(--transition);
@@ -207,6 +210,10 @@
 
 .how-source-chip:hover {
   background: var(--surface-2);
-  border-color: var(--border-2);
+  border-color: rgba(124,58,237,0.3);
   color: #fff;
+}
+
+.how-source-icon {
+  font-size: 1rem;
 }

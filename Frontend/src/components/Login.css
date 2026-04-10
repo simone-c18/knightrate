@@ -168,3 +168,22 @@
 }
 
 .auth-forgot:hover { color: var(--text-2); }
+
+.auth-forgot-container {
+  text-align: right;
+  margin-top: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.auth-link-small {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--sans);
+  transition: color var(--transition);
+}
+
+.auth-link-small:hover { color: var(--text-2); }

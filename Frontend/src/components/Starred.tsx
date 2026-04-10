@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import "./Starred.css";
-import { getStarredProfessors, unstarProfessor } from "../services/api";
+import { getStarredProfessors, unstarProfessor, getGlobalStats } from "../services/api";
 import unicornImg from "../assets/unicorn.png";
 import mastermindImg from "../assets/brain.png";
 import saboteurImg from "../assets/bomb.png";
@@ -42,13 +42,23 @@ const TAG_COLORS: Record<string, string> = {
   "Helpful":      "#16a34a",
 };
 
-const UCF_AVG = 34.2;
+interface GlobalStats {
+  retakeAvg: number;
+  qualityAvg: number;
+  difficultyAvg: number;
+  overallAvg: number;
+}
 
 export default function Starred() {
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [globalStats, setGlobalStats] = useState<GlobalStats | null>(null);
+
+  useEffect(() => {
+    getGlobalStats().then(setGlobalStats).catch(console.error);
+  }, []);
 
   useEffect(() => {
     const fetchStarred = async () => {
@@ -130,20 +140,20 @@ export default function Starred() {
                         </div>
 
                         {[
-                          { label: "Retake Score:",     val: prof.retakeScore },
-                          { label: "Quality Score:",    val: prof.qualityScore },
-                          { label: "Difficulty Score:", val: prof.difficultyScore },
-                          { label: "Overall Score:",    val: prof.overallScore },
-                        ].map(({ label, val }) => (
+                          { label: "Retake Score",     val: prof.retakeScore,     ucf: globalStats?.retakeAvg },
+                          { label: "Quality Score",    val: prof.qualityScore,    ucf: globalStats?.qualityAvg },
+                          { label: "Difficulty Score", val: prof.difficultyScore, ucf: globalStats?.difficultyAvg },
+                          { label: "Overall Score",    val: prof.overallScore,    ucf: globalStats?.overallAvg },
+                        ].map(({ label, val, ucf }) => (
                           <div key={label} className="score-row">
                             <span className="score-row-label">{label}</span>
                             <div className="score-track">
                               <div className="score-line" />
-                              <div className="ucf-bar" style={{ left: `${UCF_AVG}%` }} />
+                              {ucf != null && <div className="ucf-bar" style={{ left: `${ucf}%` }} />}
                               <div className="prof-bar" style={{ left: `${val}%` }} />
                             </div>
                             <div className="score-vals">
-                              <span className="score-val-ucf">{UCF_AVG}</span>
+                              <span className="score-val-ucf">{ucf != null ? `UCF: ${ucf.toFixed(1)}` : "—"}</span>
                               <span className="score-val-prof">{val}</span>
                             </div>
                           </div>

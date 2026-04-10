@@ -32,7 +32,8 @@ router.post("/register", async (req, res) => {
 
     await user.save();
 
-    const verifyUrl = `${process.env.FRONTEND_URL}/verify?token=${verificationToken}`;
+    const baseUrl = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
+    const verifyUrl = `${baseUrl}/verify?token=${verificationToken}`;
 
     await sendEmail({
       to: email,
@@ -135,7 +136,8 @@ router.post("/forgot-password", async (req, res) => {
     user.resetTokenExpiry = resetTokenExpiry;
     await user.save();
 
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const baseUrl = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
+    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
     await sendEmail({
       to: email,
