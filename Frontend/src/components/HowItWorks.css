@@ -1,33 +1,39 @@
-/* ── How It Works Page ─────────────────────────────── */
+/* ── How It Works / About Page ──────────────────────── */
 .hiw-page {
   min-height: 100vh;
-  background: #000;
+  background: var(--bg);
   color: #fff;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: var(--sans);
 }
 
 .hiw-body {
-  padding: 2.5rem 3rem;
-  max-width: 800px;
+  padding: 3rem 2rem 5rem;
+  max-width: 760px;
   margin: 0 auto;
 }
 
 .hiw-heading {
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
   text-align: center;
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.5rem;
 }
 
 .hiw-sub {
   text-align: center;
-  color: rgba(255,255,255,0.6);
+  color: var(--text-2);
   font-size: 0.95rem;
-  margin: 0 0 2rem;
+  margin: 0 0 3rem;
+  line-height: 1.6;
 }
 
-/* Score rows */
+/* Score table */
 .hiw-scores {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
   margin-bottom: 1.5rem;
 }
 
@@ -35,36 +41,50 @@
   display: grid;
   grid-template-columns: 160px 1fr;
   gap: 1rem;
-  padding: 0.5rem 0;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
 }
 
+.hiw-score-row:last-child { border-bottom: none; }
+.hiw-score-row:hover { background: rgba(255,255,255,0.03); }
+
 .hiw-score-label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent-2);
 }
 
 .hiw-score-desc {
-  font-size: 0.85rem;
-  color: rgba(255,255,255,0.75);
+  font-size: 0.88rem;
+  color: var(--text-2);
   line-height: 1.5;
 }
 
 .hiw-divider {
   height: 1px;
-  background: rgba(255,255,255,0.2);
-  margin: 1.5rem 0;
+  background: var(--border);
+  margin: 2.5rem 0;
 }
 
-/* Archetypes */
+/* Archetypes grid */
+.hiw-archetypes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
 .hiw-archetype {
-  margin-bottom: 2rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+  transition: all var(--transition);
 }
 
-.archetype-name {
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin: 0 0 0.6rem;
+.hiw-archetype:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: var(--border-2);
 }
 
 .archetype-row {
@@ -74,20 +94,36 @@
 }
 
 .hiw-icon {
-  width: 64px;
-  height: 64px;
-  background: #fff;
+  width: 56px;
+  height: 56px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.hiw-icon img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+
+.archetype-text { flex: 1; }
+
+.archetype-name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.2px;
 }
 
 .archetype-desc {
-  font-size: 0.9rem;
-  color: rgba(255,255,255,0.8);
-  line-height: 1.6;
+  font-size: 0.85rem;
+  color: var(--text-2);
+  line-height: 1.55;
   margin: 0;
-  padding-top: 0.3rem;
 }
