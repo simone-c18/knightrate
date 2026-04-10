@@ -1,0 +1,111 @@
+/* ── Auth Pages (Login + Register) ─────────────────── */
+.auth-page {
+  min-height: 100vh;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.auth-card {
+  background: #666;
+  border-radius: 16px;
+  padding: 2.8rem 2.5rem;
+  width: 100%;
+  max-width: 480px;
+  color: #fff;
+}
+
+.auth-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  text-align: center;
+}
+
+.auth-sub {
+  font-size: 0.95rem;
+  text-align: center;
+  color: rgba(255,255,255,0.85);
+  margin: 0 0 1.8rem;
+}
+
+.auth-link {
+  background: none;
+  border: none;
+  color: #fff;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+}
+
+.auth-field {
+  margin-bottom: 1rem;
+}
+
+.auth-label {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 0.35rem;
+  color: #fff;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  background: #fff;
+  color: #000;
+  box-sizing: border-box;
+}
+
+.auth-input:focus {
+  outline: 2px solid rgba(255,255,255,0.5);
+}
+
+.auth-error {
+  color: #ff6b6b;
+  font-size: 0.88rem;
+  text-align: center;
+  background: rgba(255,107,107,0.1);
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.auth-success {
+  color: #6bffb8;
+  font-size: 0.88rem;
+  text-align: center;
+  background: rgba(107,255,184,0.1);
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.8rem;
+  transition: opacity 0.2s;
+}
+
+.auth-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.auth-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

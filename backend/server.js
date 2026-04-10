@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
+// const { syncProfessors } = require('./utils/syncData');
 
 const app = express();
 
@@ -10,6 +11,9 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/professors", require("./routes/professors"));
+app.use("/api/users", require("./routes/users"));
+
 
 // test route
 app.get("/", (req, res) => {
@@ -18,12 +22,15 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5001;
 
-console.log(process.env.MONGO_URI);
-
 // connects to mongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log(err));
+
+// to run the syncData script
+// mongoose.connection.once('open', async () => {
+//     await syncProfessors(); 
+// });
 
 // starts backend server
 app.listen(PORT, () => {

@@ -1,117 +1,92 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./Login.css";
+import { register } from "../services/api";
 
-export default function Register({ onGoToLogin }: { onGoToLogin: () => void })
-{
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
+export default function Register() {
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const [message, setMessage] = useState("");
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-  {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) =>
-  {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (form.password !== form.confirmPassword)
-    {
-      setMessage("Passwords do not match");
-      return;
-    }
-
-    try
-    {
-      const res = await fetch('https://professor-selection-tool.onrender.com/api/auth/register',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: form.firstName + " " + form.lastName,
-          email: form.email,
-          password: form.password,
-        }),
-      });
-      const data = await res.json();
-      if (res.ok)
-      {
-        setMessage("Registration successful! You can now log in.");
-      }
-      else
-      {
-        setMessage(data.msg || "Registration failed");
-      }
-    }
-    catch (err)
-    {
-      setMessage("Server error");
+    setError("");
+    setSuccess("");
+    setLoading(true);
+    try {
+      const result = await register(form.name, form.email, form.password);
+      setSuccess(result.msg);
+      setForm({ name: "", email: "", password: "" });
+    } catch (err: any) {
+      setError(err.response?.data?.msg || "An error occurred");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div id="registerDiv">
-      <span id="inner-title">PLEASE REGISTER</span><br />
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1 className="auth-title">Create Account</h1>
+        <p className="auth-sub">
+          Already have an account yet?{" "}
+          <button className="auth-link" onClick={() => navigate("/login")}>Log in</button>
+        </p>
 
-      <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
+          <div className="auth-field">
+            <label className="auth-label">Full Name</label>
+            <input
+              className="auth-input"
+              name="name"
+              type="text"
+              placeholder="John Doe"
+              value={form.name}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <input
-          type="text"
-          name="firstName"
-          placeholder="First Name"
-          value={form.firstName}
-          onChange={handleChange}
-        /><br />
+          <div className="auth-field">
+            <label className="auth-label">Email</label>
+            <input
+              className="auth-input"
+              name="email"
+              type="email"
+              placeholder="john@example.com"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <input
-          type="text"
-          name="lastName"
-          placeholder="Last Name"
-          value={form.lastName}
-          onChange={handleChange}
-        /><br />
+          <div className="auth-field">
+            <label className="auth-label">Password</label>
+            <input
+              className="auth-input"
+              name="password"
+              type="password"
+              placeholder="Create a password"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-        /><br />
+          {error && <p className="auth-error">{error}</p>}
+          {success && <p className="auth-success">{success}</p>}
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-        /><br />
-
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={form.confirmPassword}
-          onChange={handleChange}
-        /><br />
-
-        <button type="submit">Register</button>
-      </form>
-
-      <span>{message}</span><br />
-
-      <button onClick={onGoToLogin}>
-        Back to Login
-      </button>
+          <button className="auth-btn" type="submit" disabled={loading}>
+            {loading ? "Please wait..." : "Register"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

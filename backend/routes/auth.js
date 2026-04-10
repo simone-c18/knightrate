@@ -3,36 +3,83 @@ const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail");
 
 // REGISTER
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // check if user exists
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ msg: "User already exists" });
     }
 
-    // hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // create user
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
     user = new User({
       name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      verificationToken,
+      verificationTokenExpiry,
     });
 
     await user.save();
 
-    res.json({ msg: "User registered successfully" });
+    const verifyUrl = `${process.env.FRONTEND_URL}/verify?token=${verificationToken}`;
+
+    await sendEmail({
+      to: email,
+      subject: "Verify your email – Professor Selection Tool",
+      html: `<p>Hi ${name},</p>
+             <p>Thanks for registering! Please verify your email by clicking the link below:</p>
+             <a href="${verifyUrl}">${verifyUrl}</a>
+             <p>This link expires in 24 hours.</p>`,
+    });
+
+    res.json({ msg: "Registration successful! Please check your email to verify your account." });
 
   } catch (err) {
-    res.status(500).send("Server error");
+    // console.error(err);
+    // res.status(500).json({ msg: "Server error" });
+    console.error("REGISTER ERROR:", err.message);       // <-- add this
+    console.error("FULL ERROR:", JSON.stringify(err));   // <-- and this
+    res.status(500).json({ msg: "Server error", detail: err.message }); // temp detail
+  }
+});
+
+// VERIFY EMAIL
+router.get("/verify", async (req, res) => {
+  try {
+    const { token } = req.query;
+    console.log("Verify token received:", token);
+
+    const user = await User.findOne({
+      verificationToken: token,
+      verificationTokenExpiry: { $gt: new Date() },
+    });
+    console.log("User found:", user ? user.email : "none");
+
+    if (!user) {
+      return res.status(400).json({ msg: "Invalid or expired verification link" });
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpiry = undefined;
+    await user.save();
+
+    res.json({ msg: "Email verified! You can now log in." });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Server error" });
   }
 });
 
@@ -41,19 +88,20 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 
-    // compare password
+    if (!user.isVerified) {
+      return res.status(400).json({ msg: "Please verify your email before logging in" });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 
-    // create token
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
@@ -63,7 +111,76 @@ router.post("/login", async (req, res) => {
     res.json({ token });
 
   } catch (err) {
-    res.status(500).send("Server error");
+    console.error(err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// FORGOT PASSWORD
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    // Always respond with success even if email not found (prevents email enumeration)
+    if (!user) {
+      return res.json({ msg: "If that email exists, a reset link has been sent." });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpiry = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
+
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = resetTokenExpiry;
+    await user.save();
+
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    await sendEmail({
+      to: email,
+      subject: "Reset your password – Professor Selection Tool",
+      html: `<p>Hi ${user.name},</p>
+             <p>Click the link below to reset your password. It expires in 1 hour.</p>
+             <a href="${resetUrl}">${resetUrl}</a>
+             <p>If you didn't request this, you can safely ignore this email.</p>`,
+    });
+
+    res.json({ msg: "If that email exists, a reset link has been sent." });
+
+  } catch (err) {
+    console.error("FORGOT PASSWORD ERROR:", err.message);
+    console.error("FULL ERROR:", JSON.stringify(err));
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// RESET PASSWORD
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpiry: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ msg: "Invalid or expired reset link" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
+
+    res.json({ msg: "Password reset successful! You can now log in." });
+
+  } catch (err) {
+    console.error("RESET PASSWORD ERROR:", err.message);
+    console.error("FULL ERROR:", JSON.stringify(err));
+    res.status(500).json({ msg: "Server error" });
   }
 });
 
