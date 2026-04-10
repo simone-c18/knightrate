@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
+// const { syncProfessors } = require('./utils/syncData');
 
 const app = express();
 
@@ -25,6 +26,11 @@ const PORT = process.env.PORT || 5001;
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log(err));
+
+// to run the syncData script
+// mongoose.connection.once('open', async () => {
+//     await syncProfessors(); 
+// });
 
 // starts backend server
 app.listen(PORT, () => {
