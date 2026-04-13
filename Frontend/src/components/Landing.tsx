@@ -32,9 +32,6 @@ export default function Landing() {
             <button className="hero-cta" onClick={() => navigate("/register")}>
               Get started free
             </button>
-            <button className="hero-secondary" onClick={() => navigate("/how-it-works")}>
-              How it works
-            </button>
           </div>
         </div>
       </section>

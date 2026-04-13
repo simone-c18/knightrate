@@ -30,10 +30,28 @@ interface Professor {
 }
 
 const TAG_COLORS: Record<string, string> = {
-  "Fair Grader":  "#7c3aed",
-  "Extra Credit": "#0ea5e9",
+  "Fair Grader": "#16a34a",
+  "Extra Credit": "#16a34a",
   "Tough Grader": "#dc2626",
   "Helpful":      "#16a34a",
+  "Get Ready To Read": "#90908a",
+  "Participation Matters": "#90908a",
+  "Group Projects": "#90908a",
+  "Amazing Lectures": "#16a34a",
+  "Clear Grading Criteria": "#16a34a",
+  "Gives Good Feedback": "#16a34a",
+  "Inspirational": "#16a34a",
+  "Lots Of Homework": "#dc2626",
+  "Hilarious": "#16a34a",
+  "Beware Of Pop Quizzes": "#dc2626",
+  "So Many Papers": "#dc2626",
+  "Caring": "#16a34a",
+  "Respected": "#16a34a",
+  "Lecture Heavy": "#90908a",
+  "Test Heavy": "#dc2626",
+  "Graded By Few Things": "#dc2626",
+  "Accessible Outside Class": "#16a34a",
+  "Online Savvy": "#16a34a",
 };
 
 const ARCHETYPE_DESC: Record<string, string> = {
