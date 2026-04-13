@@ -21,12 +21,13 @@ export default function Landing() {
           <div className="hero-eyebrow">✦ UCF Professor Rating Platform</div>
           <h1 className="hero-title">
             Find the right<br />
-            <span className="hero-title-accent">professors & courses</span><br />
-            at UCF.
+            <span className="hero-title-accent">professors</span><br />
+            at UCF ⚔️
           </h1>
           <p className="hero-sub">
             Our composite scoring algorithm combines 10+ metrics from RateMyProfessor,
-            SPI Surveys, and more — distilled into one clear number.
+            SPI Surveys, and more — distilled into one clear number. Search our database of
+            over 2.9k professors.
           </p>
           <div className="hero-actions">
             <button className="hero-cta" onClick={() => navigate("/register")}>
